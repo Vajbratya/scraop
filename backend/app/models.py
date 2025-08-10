@@ -111,3 +111,24 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# STT models
+class WordTimestamp(SQLModel):
+    start: float
+    end: float
+    word: str
+
+
+class TranscriptionSegment(SQLModel):
+    start: float
+    end: float
+    text: str
+    words: list[WordTimestamp] | None = None
+
+
+class TranscriptionResponse(SQLModel):
+    text: str
+    language: str
+    duration: float | None = None
+    segments: list[TranscriptionSegment] | None = None
