@@ -10,6 +10,7 @@ from pydantic import (
     PostgresDsn,
     computed_field,
     model_validator,
+    Field,
 )
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -115,6 +116,17 @@ class Settings(BaseSettings):
         )
 
         return self
+
+    # Integrations / Scraper options
+    SLACK_WEBHOOK_URL: HttpUrl | None = None
+    SCRAPER_CRON_TOKEN: str | None = None
+
+    # API hardening
+    API_KEY: str | None = None
+    IP_ALLOWLIST: list[str] = Field(default_factory=list)  # comma-separated in .env
+
+    # Optional external render service (e.g., Rendertron/Prerender) base URL
+    RENDER_SERVICE_URL: HttpUrl | None = None
 
 
 settings = Settings()  # type: ignore

@@ -145,3 +145,55 @@ class ScrapedPostPublic(ScrapedPostBase):
 class ScrapedPostsPublic(SQLModel):
     data: list[ScrapedPostPublic]
     count: int
+
+
+# Crawl job models (Firecrawl-style)
+class ScrapeJobBase(SQLModel):
+    name: str = Field(max_length=255)
+    seeds: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
+    allowed_domains: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
+    include_patterns: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
+    exclude_patterns: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
+    max_depth: int = 2
+    max_pages: int = 100
+    render_js: bool = False
+    webhook_url: str | None = Field(default=None, max_length=2048)
+    status: str = Field(default="pending", max_length=32)
+    stats: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+
+
+class ScrapeJob(ScrapeJobBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+
+class ScrapeJobPublic(ScrapeJobBase):
+    id: uuid.UUID
+
+
+class CrawlPageBase(SQLModel):
+    job_id: uuid.UUID
+    url: str = Field(max_length=2048, index=True)
+    normalized_url: str = Field(max_length=2048, index=True)
+    depth: int = 0
+    status_code: int | None = None
+    title: str | None = Field(default=None, max_length=1024)
+    content_text: str | None = None
+    score: float | None = None
+    fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    meta: dict[str, Any] | None = Field(default=None, sa_column=Column(JSONB))
+
+
+class CrawlPage(CrawlPageBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+
+class CrawlPagePublic(CrawlPageBase):
+    id: uuid.UUID
+
+
+class CrawlPagesPublic(SQLModel):
+    data: list[CrawlPagePublic]
+    count: int

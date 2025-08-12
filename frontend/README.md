@@ -2,6 +2,15 @@
 
 The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router) and [Chakra UI](https://chakra-ui.com/).
 
+## Highlights
+- Scraper page (`/_layout/scraper`):
+  - Run scrapes for known companies
+  - Filters, sorting (newest/score/title), auto‑refresh (60s), CSV export
+- Playground (`/playground`):
+  - Set API base, login to get token, run/list scrapes
+  - Cookbooks: PubMed search/summarize (GPT‑4o), Ask with URLs (Perplexity‑like)
+- API Docs: `/docs` embedded swagger
+
 ## Frontend development
 
 Before you begin, ensure that you have either the Node Version Manager (nvm) or Fast Node Manager (fnm) installed on your system.
