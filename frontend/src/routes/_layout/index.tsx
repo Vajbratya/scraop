@@ -1,4 +1,5 @@
-import { Box, Container, Text } from "@chakra-ui/react"
+import { Box, Container, HStack, Link, Text } from "@chakra-ui/react"
+import { Link as RouterLink } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 
 import useAuth from "@/hooks/useAuth"
@@ -18,6 +19,14 @@ function Dashboard() {
             Hi, {currentUser?.full_name || currentUser?.email} 👋🏼
           </Text>
           <Text>Welcome back, nice to see you again!</Text>
+          <HStack mt={6} gap={4}>
+            <RouterLink to="/docs">
+              <Link color="teal.500">Open API Docs</Link>
+            </RouterLink>
+            <RouterLink to="/scraper">
+              <Link color="teal.500">Open Scraper</Link>
+            </RouterLink>
+          </HStack>
         </Box>
       </Container>
     </>

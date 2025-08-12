@@ -9,6 +9,22 @@
 
 Start the local development environment with Docker Compose following the guide in [../development.md](../development.md).
 
+## Scraper
+
+This project includes a lightweight scraper to gather public posts from startup websites via RSS/sitemaps and store them in the database.
+
+- Run (as superuser) to scrape selected companies:
+
+  - POST `/api/v1/scraper/run/?companies=laudite&companies=laudos.ai`
+
+- List results:
+
+  - GET `/api/v1/scraper/posts/?company=laudite`
+
+Notes:
+- Social network connectors are pluggable but require API credentials; the default implementation only uses public RSS/sitemaps without external dependencies.
+- Extend `DEFAULT_SOURCES` in `app/scraper/runner.py` to add more startups and sources.
+
 ## General Workflow
 
 By default, the dependencies are managed with [uv](https://docs.astral.sh/uv/), go there and install it.
@@ -138,7 +154,7 @@ $ docker compose exec backend bash
 * After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
 
 ```console
-$ alembic revision --autogenerate -m "Add column last_name to User model"
+$ alembic revision --autogenerate -m "Add scraped post model"
 ```
 
 * Commit to the git repository the files generated in the alembic directory.

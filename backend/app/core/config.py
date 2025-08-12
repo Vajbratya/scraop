@@ -95,24 +95,6 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    # Speech-to-Text (Whisper via faster-whisper)
-    STT_MODEL_ID: str = "large-v3"
-    STT_DEVICE: Literal["auto", "cpu", "cuda"] = "auto"
-    STT_COMPUTE_TYPE: Literal[
-        "auto",
-        "default",
-        "float16",
-        "int8",
-        "int8_float16",
-        "int8_float32",
-        "int16",
-        "float32",
-    ] = "int8"
-    STT_THREADS: int = 4
-    STT_BEAM_SIZE: int = 5
-    STT_ENABLE_VAD: bool = True
-    STT_ENABLE_WORD_TIMESTAMPS: bool = True
-
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

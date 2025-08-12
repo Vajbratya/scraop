@@ -2,6 +2,11 @@ import uuid
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+from datetime import datetime, timezone
+from typing import Any
+
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 # Shared properties
@@ -113,22 +118,30 @@ class NewPassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
-# STT models
-class WordTimestamp(SQLModel):
-    start: float
-    end: float
-    word: str
+# Scraper models
+class ScrapedPostBase(SQLModel):
+    company: str = Field(index=True, max_length=128)
+    platform: str = Field(index=True, max_length=64)
+    url: str = Field(unique=True, max_length=2048)
+    title: str | None = Field(default=None, max_length=1024)
+    content: str | None = None
+    language: str | None = Field(default=None, max_length=12)
+    published_at: datetime | None = None
+    fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    score: float | None = None
+    metadata: dict[str, Any] | None = Field(
+        default=None, sa_column=Column(JSONB), description="Raw metadata for the post"
+    )
 
 
-class TranscriptionSegment(SQLModel):
-    start: float
-    end: float
-    text: str
-    words: list[WordTimestamp] | None = None
+class ScrapedPost(ScrapedPostBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
 
-class TranscriptionResponse(SQLModel):
-    text: str
-    language: str
-    duration: float | None = None
-    segments: list[TranscriptionSegment] | None = None
+class ScrapedPostPublic(ScrapedPostBase):
+    id: uuid.UUID
+
+
+class ScrapedPostsPublic(SQLModel):
+    data: list[ScrapedPostPublic]
+    count: int

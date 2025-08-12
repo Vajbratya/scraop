@@ -40,9 +40,4 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Runtime tools for audio processing
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
-  && rm -rf /var/lib/apt/lists/*
-
 CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
