@@ -307,3 +307,89 @@ Backend API docs: `https://api.staging.fastapi-project.example.com/docs`
 Backend API base URL: `https://api.staging.fastapi-project.example.com`
 
 Adminer: `https://adminer.staging.fastapi-project.example.com`
+
+## Fly.io (backend and frontend)
+
+Fly needs a Dockerfile or a recognizable runtime in the app root. This repo is a monorepo, so provide a fly.toml that points to the correct Dockerfile.
+
+### Backend (FastAPI)
+
+1) Create `backend/fly.toml` or use the one included:
+
+```toml
+app = "your-backend-app"
+primary_region = "gig"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+
+[env]
+  ENVIRONMENT = "production"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+```
+
+2) From repo root:
+```bash
+flyctl apps create your-backend-app
+flyctl launch --config backend/fly.toml --copy-config --now
+```
+(Or: `flyctl deploy --config backend/fly.toml`)
+
+3) Set secrets:
+```bash
+flyctl secrets set SECRET_KEY=... FIRST_SUPERUSER=... FIRST_SUPERUSER_PASSWORD=... \
+  DATABASE_URL=postgres://... \
+  FRONTEND_HOST=https://your-frontend.fly.dev \
+  BACKEND_CORS_ORIGINS='["https://your-frontend.fly.dev"]' \
+  OPENAI_API_KEY=... SLACK_WEBHOOK_URL=... SCRAPER_CRON_TOKEN=... API_KEY=... \
+  --app your-backend-app
+```
+
+### Frontend (React)
+
+1) Create `frontend/fly.toml` or use the one included:
+
+```toml
+app = "your-frontend-app"
+primary_region = "gig"
+
+[build]
+  dockerfile = "frontend/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+```
+
+2) Build with backend URL:
+```bash
+flyctl apps create your-frontend-app
+flyctl deploy --config frontend/fly.toml --build-arg VITE_API_URL=https://your-backend.fly.dev
+```
+
+### Common pitfalls
+- If Fly says "Could not detect runtime or Dockerfile": use `--config backend/fly.toml` or `--config frontend/fly.toml` so it points to the service’s Dockerfile.
+- Ensure `DATABASE_URL` is set on backend (Fly Postgres or managed provider). The backend will use `DATABASE_URL` if present.
+- CORS: set `FRONTEND_HOST` and `BACKEND_CORS_ORIGINS` to your frontend origin.
+- Cron: use an external scheduler to call `/api/v1/scraper/run-cron` with `X-Cron-Token`.
+
+## Docker Compose (VPS)
+See `docker-compose.yml` and `.override` for local/prod. Set `.env` accordingly.

@@ -13,6 +13,7 @@ from pydantic import (
     Field,
 )
 from pydantic_core import MultiHostUrl
+from pydantic import PostgresDsn as PydPostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
@@ -52,15 +53,20 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
+
+    # DB: either use components or DATABASE_URL if provided (Fly.io sets it)
+    POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
+    POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
+    POSTGRES_DB: str = "app"
+    DATABASE_URL: PydPostgresDsn | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        if self.DATABASE_URL:
+            return self.DATABASE_URL  # type: ignore[return-value]
         return MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,

@@ -1,0 +1,18 @@
+app = "your-frontend-app"
+primary_region = "gig"
+
+[build]
+  dockerfile = "frontend/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
